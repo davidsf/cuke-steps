@@ -5,13 +5,13 @@ require 'cgi'
 require 'fileutils'
 
 class HtmlStepOutputter
-  
+
   def initialize(file)
     @file = File.open(file, 'w')
     @previous_type = ""
     @id_number = 0
   end
-  
+
   # HTML file header - customize as needed
   def header
     @file.puts <<-eos
@@ -47,7 +47,7 @@ class HtmlStepOutputter
       <body>
     eos
   end
-  
+
   def footer
     @file.puts <<-eos
       </ul>
@@ -58,15 +58,31 @@ class HtmlStepOutputter
     eos
   end
 
-  
+
   def close
     @file.close
+  end
+
+  def start_file_list
+    @file.puts %(<a name="upper"></a>)
+    @file.puts %(<h2>File list</h2>)
+    @file.puts %(<ul>)
+  end
+
+  def end_file_list
+    @file.puts %(</ul>)
+  end
+
+  def add_file_link(filename)
+    @file.puts %(<li><a href="##{filename}">#{filename}</a></li>)
   end
 
   def start_directory(dir)
     @file.puts %(</ul>) if @previous_type != ""
     @file.puts %(<p>&nbsp;</p>)
-    @file.puts %(<h2>Step definitions in #{dir}/</h2>)
+    @file.puts %(<a name="#{dir}"></a>)
+    @file.puts %(<h2>Step definitions in #{dir}</h2>)
+    @file.puts %(<a href="#upper">Go up</a>)
     @previous_type = ""
   end
 
@@ -108,9 +124,9 @@ class HtmlStepOutputter
     @file.puts %(  </div>)
     @file.puts %(</li>)
   end
-  
+
   private
-  
+
   def new_id
     @id_number += 1
     "id#{@id_number}"

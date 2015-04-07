@@ -72,17 +72,23 @@ all_steps = []
 output.header
 dirs.each do |dir|
   dir = dir.sub(/\/+$/, "")
-  s = StepParser.new
-  Dir.glob("#{dir}/**/*.rb") do |file|
-    s.read(file)
+  output.start_file_list
+  filenames = Dir.glob("#{dir}/**/*.rb").sort
+  for file in filenames do
+    filename = file.split('/').last
+    output.add_file_link(filename)
   end
-  steps = s.steps
-  all_steps += steps
-
-  output.start_directory(dir)
-  steps.sort!(&sorter)
-  steps.each { |s| output.step(s) }
-  output.end_directory
+  output.end_file_list
+  for file in filenames do
+    s = StepParser.new
+    s.read(file)
+    steps = s.steps
+    all_steps += steps
+    output.start_directory(file.split('/').last)
+    steps.sort!(&sorter)
+    steps.each { |s| output.step(s) }
+    output.end_directory
+  end
 end
 
 if dirs.size > 1
